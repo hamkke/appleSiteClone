@@ -6,7 +6,7 @@
 
     const sceneInfo = [
         {
-            // 1
+            // 0섹션
             // 브라우저 높이의 5배로 scrollHeight 세팅, 모든 기기가 똑같은 높이가 아닝께
             type: 'sticky',
             heightNum: 5,
@@ -24,7 +24,7 @@
         },
 
         {
-            // 2
+            // 1섹션
             type: 'normal',
             heightNum: 5,
             scrollHeight: 0,
@@ -33,7 +33,7 @@
             },
         },
         {
-            // 3
+            // 2섹션
             type: 'sticky',
             heightNum: 5,
             scrollHeight: 0,
@@ -42,7 +42,7 @@
             },
         },
         {
-            // 4
+            // 3섹션
             type: 'sticky',
             heightNum: 5,
             scrollHeight: 0,
@@ -70,10 +70,29 @@
         }
         document.body.setAttribute('id', `show-scene${currScene}`);
     }
+
+    function calcValues(values, currYOffset) { //currYOffset은 현재 씬에서 얼마나 스크롤 됐는지 나타냄
+        let rv;
+        // 현재 씬(스크롤섹션)에서 스크롤 된 범위를 비율로 구하기 
+        let scrollRatio = currYOffset / sceneInfo[currScene].scrollHeight;
+        
+        rv = scrollRatio * (values[1]-values[0] + values[0]);
+        
+        return rv;
+    }
+
     function playAnimation() {
+        const objs = sceneInfo[currScene].objs;
+        const values = sceneInfo[currScene].values;
+        const currYOffset = yOffset - prevScrollHeight;
+        
+        console.log(currScene);
         switch (currScene) {
             case 0:
                 // console.log(1); 
+                let messageA_opacity_in = calcValues(values.messageA_opacity, currYOffset);
+                objs.messageA.style.opacity = messageA_opacity_in;
+                console.log(messageA_opacity_in);
                 break;
 
             case 1:
