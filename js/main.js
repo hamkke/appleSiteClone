@@ -1,140 +1,226 @@
-(() => {  // 즉시호출함수, 전역변수를 피하기 위해
-    let yOffset = 0; // window.pageYOffset를 변수로 지정
-    let prevScrollHeight = 0; // 현재 스크롤 위치(yOffset)보다 이전에 위치한 스크롤 섹션들의 스크롤 높이값의 합
-    let currScene = 0; // 현재 활성화된 씬(scroll-sect)
+// (() => {  // 즉시호출함수
+//     let yOffset = 0; // window.pageYOffset를 변수로 지정
+//     let prevScrollHeight = 0; // 현재 스크롤 위치(yOffset)보다 이전에 위치한 스크롤 섹션들의 스크롤 높이값의 합
+//     let currScene = 0; // 현재 활성화된 씬(scroll-sect)
 
+
+//     const sceneInfo = [
+//         {
+//             // 0섹션
+//             // 브라우저 높이의 5배로 scrollHeight 세팅, 모든 기기가 똑같은 높이가 아닝께
+//             type: 'sticky',
+//             heightNum: 5,
+//             scrollHeight: 0,
+//             objs: {
+//                 container: document.querySelector("#scroll-sect1"),
+//                 messageA: document.querySelector("#scroll-sect1 .main-message.a"),
+//                 messageB: document.querySelector("#scroll-sect1 .main-message.b"),
+//                 messageC: document.querySelector("#scroll-sect1 .main-message.c"),
+//                 messageD: document.querySelector("#scroll-sect1 .main-message.d"),
+//             },
+//             values: {
+//                 messageA_opacity: [0, 1],
+//             },
+//         },
+
+//         {
+//             // 1섹션
+//             type: 'normal',
+//             heightNum: 5,
+//             scrollHeight: 0,
+//             objs: {
+//                 container: document.querySelector("#scroll-sect2")
+//             },
+//         },
+//         {
+//             // 2섹션
+//             type: 'sticky',
+//             heightNum: 5,
+//             scrollHeight: 0,
+//             objs: {
+//                 container: document.querySelector("#scroll-sect3")
+//             },
+//         },
+//         {
+//             // 3섹션
+//             type: 'sticky',
+//             heightNum: 5,
+//             scrollHeight: 0,
+//             objs: {
+//                 container: document.querySelector("#scroll-sect4")
+//             },
+//         },
+//     ];
+
+//     function setLayout() {
+//         // 각 스크롤 섹션의 높이 세팅
+//         for (let i = 0; i < sceneInfo.length; i++) {
+//             sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight;
+//             sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`;
+//         }
+
+//         let totalScrollHeight = 0;
+//         yOffset = window.pageYOffset;
+//         for (let i = 0; i < sceneInfo.length; i++) {
+//             totalScrollHeight += sceneInfo[i].scrollHeight;
+//             if (totalScrollHeight >= yOffset) {
+//                 currScene = i;
+//                 break;
+//             }
+//         }
+//         document.body.setAttribute('id', `show-scene${currScene}`);
+//     }
+
+//     function calcValues(values, currYOffset) { //currYOffset은 현재 씬에서 얼마나 스크롤 됐는지 나타냄
+//         let rv;
+//         // 현재 씬(스크롤섹션)에서 스크롤 된 범위를 비율로 구하기 
+//         let scrollRatio = currYOffset / sceneInfo[currScene].scrollHeight;
+        
+//         rv = scrollRatio * (values[1]-values[0] + values[0]);
+        
+//         return rv;
+//     }
+
+//     function playAnimation() {
+//         const objs = sceneInfo[currScene].objs;
+//         const values = sceneInfo[currScene].values;
+//         const currYOffset = yOffset - prevScrollHeight;
+        
+//         console.log(currScene);
+//         switch (currScene) {
+//             case 0:
+//                 // console.log(1); 
+//                 let messageA_opacity_in = calcValues(values.messageA_opacity, currYOffset);
+//                 objs.messageA.style.opacity = messageA_opacity_in;
+//                 console.log(messageA_opacity_in);
+//                 break;
+
+//             case 1:
+//                 // console.log(2);
+//                 break;
+
+//             case 2:
+//                 // console.log(3);
+//                 break;
+
+//             case 3:
+//                 // console.log(4);
+//                 break;    
+//         }
+//     }
+
+//     function scrollLoop() {
+//         prevScrollHeight = 0; // 스크롤이 움직일 때 마다 값이 나와서 0으로 만들어준다
+//         for (let i = 0; i < currScene; i++){
+//             prevScrollHeight += sceneInfo[i].scrollHeight;
+//         }
+//         // console.log(prevScrollHeight);
+//         if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
+//             currScene++;
+//             document.body.setAttribute('id', `show-scene${currScene}`);
+//         }
+
+//         if (yOffset < prevScrollHeight) {
+//             if (currScene === 0) return; // 브라우저 바운스 효과로 인해 마이너스가 음수가 되는 것을 방지(모바일)
+//             currScene--;
+//             document.body.setAttribute('id', `show-scene${currScene}`);
+//         }
+//         // console.log(currScene);
+//         playAnimation();
+//     }
+
+//     window.addEventListener('scroll', () => {
+//         yOffset = window.pageYOffset; // 스크롤 위치를 알 수 있당
+//         // console.log('지금 내 높이는', yOffset);
+//         scrollLoop();
+//     });
+//     window.addEventListener('resize', setLayout);
+//     window.addEventListener('load', setLayout); // DOMContentloaded도 사용 가능 
+
+// })();
+
+
+// 이해가 안돼서 다시 처음부터 시작
+(() => {
+    let yOffset = 0; // pageYOffset대신 쓸 변수
+    let prevScrollHeight = 0; // 현재 스크롤 위치(yOffset)보다 이전에 위치한 스크롤 섹션들의 높이값의 합을 저장할 변수
+    let currScene = 2; // 현재 활성화된(눈 앞에 있는 씬) 씬(scroll-sect)
 
     const sceneInfo = [
-        {
-            // 0섹션
-            // 브라우저 높이의 5배로 scrollHeight 세팅, 모든 기기가 똑같은 높이가 아닝께
-            type: 'sticky',
-            heightNum: 5,
-            scrollHeight: 0,
-            objs: {
-                container: document.querySelector("#scroll-sect1"),
-                messageA: document.querySelector("#scroll-sect1 .main-message.a"),
-                messageB: document.querySelector("#scroll-sect1 .main-message.b"),
-                messageC: document.querySelector("#scroll-sect1 .main-message.c"),
-                messageD: document.querySelector("#scroll-sect1 .main-message.d"),
-            },
-            values: {
-                messageA_opacity: [0, 1],
-            },
-        },
 
         {
-            // 1섹션
+            // 섹션0
+            type: 'sticky', // 스크롤에 따라 애니메이션있는 씬은 stick, 아니면 normal임
+            heightNum:5,
+            /*
+            브라우저 높이의 5배로 scrollHeight 세팅, ex)scrollHeight * heightNum
+            스크롤되는 양 자체가 애니메이션의 속도를 결정하므로, 원하시는 느낌에 따라 적절히 조정가능,
+            곱해지는 수가 커질수록 스크롤을 많이 해야하고, 작을수록 스크롤을 적게 해도 애니메이션이 휙휙 재생
+            */
+            scrollHeight:0, // 모든 디바이스의 크기가 다르기 떄문에 특정 수로 지정 X 일단 0으로 세팅
+            objs: {
+                container: document.querySelector('#scroll-sect1'),
+            },
+        },
+        {
+            //섹션1
             type: 'normal',
-            heightNum: 5,
-            scrollHeight: 0,
+            heightNum:5,
+            scrollHeight:0,
             objs: {
-                container: document.querySelector("#scroll-sect2")
+                container: document.querySelector('#scroll-sect2'),
             },
         },
         {
-            // 2섹션
+            //섹션2
             type: 'sticky',
-            heightNum: 5,
-            scrollHeight: 0,
+            heightNum:5,
+            scrollHeight:0,
             objs: {
-                container: document.querySelector("#scroll-sect3")
+                container: document.querySelector('#scroll-sect3'),
             },
         },
         {
-            // 3섹션
+            //섹션3
             type: 'sticky',
-            heightNum: 5,
-            scrollHeight: 0,
+            heightNum:5,
+            scrollHeight:0,
             objs: {
-                container: document.querySelector("#scroll-sect4")
+                container: document.querySelector('#scroll-sect4'),
             },
         },
     ];
 
     function setLayout() {
         // 각 스크롤 섹션의 높이 세팅
-        for (let i = 0; i < sceneInfo.length; i++) {
+        for(let i = 0; i < sceneInfo.length; i++){
             sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight;
-            sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`;
-        }
-
-        let totalScrollHeight = 0;
-        yOffset = window.pageYOffset;
-        for (let i = 0; i < sceneInfo.length; i++) {
-            totalScrollHeight += sceneInfo[i].scrollHeight;
-            if (totalScrollHeight >= yOffset) {
-                currScene = i;
-                break;
-            }
-        }
-        document.body.setAttribute('id', `show-scene${currScene}`);
-    }
-
-    function calcValues(values, currYOffset) { //currYOffset은 현재 씬에서 얼마나 스크롤 됐는지 나타냄
-        let rv;
-        // 현재 씬(스크롤섹션)에서 스크롤 된 범위를 비율로 구하기 
-        let scrollRatio = currYOffset / sceneInfo[currScene].scrollHeight;
-        
-        rv = scrollRatio * (values[1]-values[0] + values[0]);
-        
-        return rv;
-    }
-
-    function playAnimation() {
-        const objs = sceneInfo[currScene].objs;
-        const values = sceneInfo[currScene].values;
-        const currYOffset = yOffset - prevScrollHeight;
-        
-        console.log(currScene);
-        switch (currScene) {
-            case 0:
-                // console.log(1); 
-                let messageA_opacity_in = calcValues(values.messageA_opacity, currYOffset);
-                objs.messageA.style.opacity = messageA_opacity_in;
-                console.log(messageA_opacity_in);
-                break;
-
-            case 1:
-                // console.log(2);
-                break;
-
-            case 2:
-                // console.log(3);
-                break;
-
-            case 3:
-                // console.log(4);
-                break;    
+            sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`; // 템플릿 문자열
         }
     }
-
+    
     function scrollLoop() {
-        prevScrollHeight = 0; // 스크롤이 움직일 때 마다 값이 나와서 0으로 만들어준다
-        for (let i = 0; i < currScene; i++){
-            prevScrollHeight += sceneInfo[i].scrollHeight;
+        prevScrollHeight = 0;
+        for(let i =0; i < currScene; i++){ // 0이면 flase니까 실행 안됨, 그래서 currScene의 값을 +1,-1 해주기
+            console.log(sceneInfo[2].scrollHeight);
+            prevScrollHeight = prevScrollHeight + sceneInfo[i].scrollHeight;
+            console.log(prevScrollHeight);
+            // console.log(sceneInfo.length); = 4
         }
-        // console.log(prevScrollHeight);
-        if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
-            currScene++;
-            document.body.setAttribute('id', `show-scene${currScene}`);
-        }
+        // console.log(prevScrollHeight); 값이 초기화가 되지 못한 상태라 처음 수가 나오고 점점 배가 된다 그래서 초기화 해주깅, prevScrollHeight = 0;
+        // if (yOffset > prevScrollHeight) {
 
-        if (yOffset < prevScrollHeight) {
-            if (currScene === 0) return; // 브라우저 바운스 효과로 인해 마이너스가 음수가 되는 것을 방지(모바일)
-            currScene--;
-            document.body.setAttribute('id', `show-scene${currScene}`);
-        }
-        // console.log(currScene);
-        playAnimation();
+        // }
+        // if (yOffset < prevScrollHeight) {
+
+        // }
     }
 
-    window.addEventListener('scroll', () => {
-        yOffset = window.pageYOffset; // 스크롤 위치를 알 수 있당
-        // console.log('지금 내 높이는', yOffset);
+    window.addEventListener('resize', setLayout); // 창 크기를 변하면 scrollHeight도 그에 맞게 변하게 하기
+    window.addEventListener('scroll', () => { // 몇번 째 씬이 화면에 위치해 있는지 확인하기
+        yOffset = window.pageYOffset; // 스크롤 위치 알려줌
         scrollLoop();
-    });
-    window.addEventListener('resize', setLayout);
-    window.addEventListener('load', setLayout); // DOMContentloaded도 사용 가능 
+    })
+    setLayout();
 
 })();
