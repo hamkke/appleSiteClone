@@ -144,7 +144,7 @@
 (() => {
     let yOffset = 0; // pageYOffset대신 쓸 변수
     let prevScrollHeight = 0; // 현재 스크롤 위치(yOffset)보다 이전에 위치한 스크롤 섹션들의 높이값의 합을 저장할 변수
-    let currScene = 2; // 현재 활성화된(눈 앞에 있는 씬) 씬(scroll-sect)
+    let currScene = 0; // 현재 활성화된(눈 앞에 있는 씬) 씬(scroll-sect)
 
     const sceneInfo = [
 
@@ -160,6 +160,13 @@
             scrollHeight:0, // 모든 디바이스의 크기가 다르기 떄문에 특정 수로 지정 X 일단 0으로 세팅
             objs: {
                 container: document.querySelector('#scroll-sect1'),
+                messageA: document.querySelector("#scroll-sect1 .main-message.a"),
+                messageB: document.querySelector("#scroll-sect1 .main-message.b"),
+                messageC: document.querySelector("#scroll-sect1 .main-message.c"),
+                messageD: document.querySelector("#scroll-sect1 .main-message.d"),
+            },
+            values: {
+                messageA_opacity: [0, 1],
             },
         },
         {
@@ -197,30 +204,89 @@
             sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight;
             sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`; // 템플릿 문자열
         }
+
+        //새로고침핻도 currScene세팅하기
+        // 강의-현재 활성 씬 반영하기 13:00 참고
+        yOffset = window.pageYOffset; // 확실하게 하기 위해 작성
+        let totalScrollHeight = 0;
+
+        for(let i =0; i < sceneInfo.length; i++) {
+            totalScrollHeight += sceneInfo[i].scrollHeight;
+            if(totalScrollHeight >= yOffset) {
+                currScene = i;
+                break;
+            }
+        }
+        document.body.setAttribute('id', `show-scene${currScene}`);
+    }
+
+
+    function calcValues(vlaues , currYOffset) { // 여기서 values는 sceneInfo안에 있는 애, currYOffset은 현재 씬에서 얼마나 스크롤 됐는지 알려주는 애
+        let rv;
+        // 현재 씬에서 얼마나 스크롤 됐는지 비율로 구하기
+        // 강의- 스크롤 애니메이션 구현3 1:46참고
+        let scrollRatio = currYOffset / sceneInfo[currScene].scrollHeight;
+
+        rv = scrollRatio * 200;
+        return rv;
+    }
+
+    function playAnimation() {
+        const objs = sceneInfo[currScene].objs;
+        const values = sceneInfo[currScene].values;
+        const currYOffset = yOffset - prevScrollHeight;
+        // console.log(currScene, currYOffset);
+
+        // 해당 currScene의 요소들만 활성화 시키기 위해 switch문 사용
+        switch (currScene) {
+            case 0:
+                // console.log(1);
+                let messageA_opacity0 = values.messageA_opacity[0];
+                let messageA_opacity1 = values.messageA_opacity[1];
+                console.log(calcValues(values.messageA_opacity, currYOffset))
+                break;
+            case 1:
+                // console.log(2);
+                break;
+            case 2:
+                // console.log(3);
+                break;
+            case 3:
+                // console.log(4);
+                break;
+        }
     }
     
     function scrollLoop() {
+        // console.log('1',prevScrollHeight);
         prevScrollHeight = 0;
         for(let i =0; i < currScene; i++){ // 0이면 flase니까 실행 안됨, 그래서 currScene의 값을 +1,-1 해주기
-            console.log(sceneInfo[2].scrollHeight);
-            prevScrollHeight = prevScrollHeight + sceneInfo[i].scrollHeight;
-            console.log(prevScrollHeight);
             // console.log(sceneInfo.length); = 4
+            prevScrollHeight = prevScrollHeight + sceneInfo[i].scrollHeight;
+            // console.log('2',prevScrollHeight);
         }
+        // console.log('3',prevScrollHeight);
         // console.log(prevScrollHeight); 값이 초기화가 되지 못한 상태라 처음 수가 나오고 점점 배가 된다 그래서 초기화 해주깅, prevScrollHeight = 0;
-        // if (yOffset > prevScrollHeight) {
-
-        // }
-        // if (yOffset < prevScrollHeight) {
-
-        // }
+        if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) { // prev랑 지금 내가 위치해 있는 씬의 scrollHeight까지 더하기
+            currScene++;
+            // element.setAttribute( 'attributename', 'attributevalue' )
+            document.body.setAttribute('id', `show-scene${currScene}`);
+            
+        }
+        if (yOffset < prevScrollHeight) { // 얘는 스크롤을 올릴 때 상황, 지금 있는 씬의 위의 씬에 바닥에 닿자마자 애니 실행하면 되니까 그냥 prev만
+            if (currScene === 0) return; // 브라우저 바운스 효과로 인해 마이너스가 음수가 되는 것을 방지(모바일)
+            currScene--;
+            document.body.setAttribute('id', `show-scene${currScene}`);
+        }
+        // console.log(currScene); 
+        playAnimation();
     }
 
-    window.addEventListener('resize', setLayout); // 창 크기를 변하면 scrollHeight도 그에 맞게 변하게 하기
     window.addEventListener('scroll', () => { // 몇번 째 씬이 화면에 위치해 있는지 확인하기
         yOffset = window.pageYOffset; // 스크롤 위치 알려줌
         scrollLoop();
-    })
-    setLayout();
+    });
+    window.addEventListener('load', setLayout); // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
+    window.addEventListener('resize', setLayout); // 창 크기를 변하면 scrollHeight도 그에 맞게 변하게 하기
 
 })();
