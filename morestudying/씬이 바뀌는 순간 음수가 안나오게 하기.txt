@@ -38,3 +38,4 @@ currScene이 바꿔주는 함수를 통해 안나오게 하는 거임
 
         playAnimation();
     }
+    

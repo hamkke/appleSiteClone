@@ -167,7 +167,10 @@
                 messageD: document.querySelector("#scroll-sect1 .main-message.d"),
             },
             values: {
-                messageA_opacity: [0, 1],
+                // start랑 end는 애니메이션 되는 구간이라 보면 됨, 소수점인건 비율로 설정했기 때문
+                messageA_opacity_in: [0, 1, {start:0.1, end:0.2}], 
+                // messageB_opacity_in: [0, 1, {start:0.3, end:0.4}],
+                messageA_opacity_out: [1, 0, {start:0.25, end:0.3}], 
             },
         },
         {
@@ -205,7 +208,7 @@
             sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`; // 템플릿 문자열
         }
         
-        //새로고침핻도 currScene세팅하기
+        //새로고침했을 때 currScene세팅하기
         // 강의-현재 활성 씬 반영하기 13:00 참고
         yOffset = window.pageYOffset; // 확실하게 하기 위해 작성
         let totalScrollHeight = 0;
@@ -227,16 +230,33 @@
         // console.log(rv);
         // 현재 씬에서 얼마나 스크롤 됐는지 비율로 구하기
         // 강의- 스크롤 애니메이션 구현3 1:46참고
-        let scrollRatio = currYOffset / sceneInfo[currScene].scrollHeight;
+        const scrollHeight = sceneInfo[currScene].scrollHeight;
+        const scrollRatio = currYOffset / scrollHeight;
         // 현재 씬에서 스크롤 위치 / 현재 씬의 전체 높이 = 소수점으로 비율이 나옴
-        
-        rv = scrollRatio * ((values[1] - values[0]) + values[0]); // 곱해주는 값은 전체 범위의 값을 곱한다
-        /*
-        지금은 messageA_opacity: [0, 1] 라는 범위가 정해져 있지만, 나중에 위치나 다른 값으로 바뀔 수 있기 때문에 
-        마지막값에서 첫번째 값을 빼고 첫번째 값을 더한다 
-        ex) messageA_opacity: [200, 900]이라면  200-900+200 = 700이라는 전체 범위가 나온다
-        거기에 scrollRatio를 곱해주면 
-        */
+        if (values.length === 3) { // 3이라는건 마지막 값이 있다는 뜻이라서 
+            // start - end 사이에 애니메이션 실행
+            const partScrollStrat = values[2].start * scrollHeight;
+            const partScrollEnd = values[2].end * scrollHeight;
+            const partSCrollHeight = partScrollEnd - partScrollStrat;
+
+            if (currYOffset >= partScrollStrat && currYOffset <= partScrollEnd) {
+                rv = (currYOffset - partScrollStrat) / partSCrollHeight * ((values[1] - values[0]) + values[0]);
+            } else if (currYOffset < partScrollStrat) {
+                rv = values[0];
+            } else if (currYOffset > partScrollStrat) {
+                rv = values[1];
+            }
+            
+
+        } else {
+            rv = scrollRatio * ((values[1] - values[0]) + values[0]); // 곱해주는 값은 전체 범위의 값을 곱한다
+            /*
+            지금은 messageA_opacity: [0, 1] 라는 범위가 정해져 있지만, 나중에 위치나 다른 값으로 바뀔 수 있기 때문에 
+            마지막값에서 첫번째 값을 빼고 첫번째 값을 더한다 
+            ex) messageA_opacity: [200, 900]이라면  200-900+200 = 700이라는 전체 범위가 나온다
+            거기에 scrollRatio를 곱해주면 
+            */
+        }
     //    console.log(rv);
        return rv;
     }
@@ -246,17 +266,27 @@
         const objs = sceneInfo[currScene].objs;
         const values = sceneInfo[currScene].values;
         const currYOffset = yOffset - prevScrollHeight; // 전체 높이에서 이전 씬들의 합 === 내가 현재 씬에서의 스크롤 위치
-        // console.log(currScene, currYOffset);
-        
-        console.log(currScene);
+		const scrollHeight = sceneInfo[currScene].scrollHeight;
+		const scrollRatio = currYOffset / scrollHeight;
 
+
+        // console.log(currScene, currYOffset);
         // 해당 currScene의 요소들만 활성화 시키기 위해 switch문 사용
         switch (currScene) {
             case 0:
                 // console.log(1);
-                let messageA_opacity_in = calcValues(values.messageA_opacity, currYOffset);
+                const messageA_opacity_in = calcValues(values.messageA_opacity_in, currYOffset);
+                const messageA_opacity_out = calcValues(values.messageA_opacity_out, currYOffset);
+
+                if (scrollRatio <= 0.22) {
+                    // in
+                    objs.messageA.style.opacity = messageA_opacity_in;
+                } else {
+                    // out
+                    objs.messageA.style.opacity = messageA_opacity_out;
+                    
+                }
                 // console.log(messageA_opacity_in);
-                objs.messageA.style.opacity = messageA_opacity_in;
                 break;
             case 1:
                 // console.log(2);
@@ -271,7 +301,7 @@
     }
     
     function scrollLoop() {
-        enterNScene = false; // 안 바뀌고 있으니까 일단 false고
+        enterNScene = false; // 씬이 안 바뀌고 있으니까 일단 false고
         // console.log('1',prevScrollHeight);
         prevScrollHeight = 0;
         for(let i =0; i < currScene; i++){ // 0이면 flase니까 실행 안됨, 그래서 currScene의 값을 +1,-1 해주기
@@ -282,7 +312,7 @@
         // console.log('3',prevScrollHeight);
         // console.log(prevScrollHeight); 값이 초기화가 되지 못한 상태라 처음 수가 나오고 점점 배가 된다 그래서 초기화 해주깅, prevScrollHeight = 0;
         if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) { // prev랑 지금 내가 위치해 있는 씬의 scrollHeight까지 더하기
-            enterNScene = true; // 바뀌는 순간이니까 true인 거임
+            enterNScene = true; // 씬이 바뀌는 순간이니까 true인 거임
             currScene++;
             // element.setAttribute( 'attributename', 'attributevalue' )
             document.body.setAttribute('id', `show-scene${currScene}`);
@@ -295,15 +325,15 @@
             document.body.setAttribute('id', `show-scene${currScene}`);
         }
         // console.log(currScene); 
-        console.log('1',enterNScene);
+        // console.log(enterNScene); true
         if(enterNScene) return; //true일 때 함수를 종료해 버리자, return공부 요망
-        console.log('1',enterNScene);
+        // console.log(enterNScene); false
         playAnimation();
     }
 
-    window.addEventListener('scroll', () => { // 몇번 째 씬이 화면에 위치해 있는지 확인하기
+    window.addEventListener('scroll', () => { 
         yOffset = window.pageYOffset; // 스크롤 위치 알려줌
-        scrollLoop();
+        scrollLoop(); // 몇번 째 씬이 화면에 위치해 있는지 확인하기
     });
     window.addEventListener('load', setLayout); // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
     window.addEventListener('resize', setLayout); // 창 크기를 변하면 scrollHeight도 그에 맞게 변하게 하기
