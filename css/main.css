@@ -59,7 +59,7 @@ a {
 }
 
 .scroll-sect {
-    border:1px solid red;
+    border:3px solid red; /*임시*/
     padding-top:50vh;
 }
 
@@ -87,7 +87,7 @@ a {
     margin-bottom:0.5em;
     font-size:1.2rem;
 }
-#scroll-sect3 .main-message {
+#scroll-sect3  .main-message {
     font-size:3.5rem;
 }
 .description {
@@ -100,7 +100,7 @@ a {
 .description span {
     float:left;
     margin-right:0.2em;
-    color:#000;
+    color:rgb(29, 29, 31);
     font-size:3rem;
     font-weight:bold;
 }
@@ -129,7 +129,6 @@ a {
     padding:0 1rem;
     color:#888;
     font-size:1.2rem;
-    text-align:center;
 }
 
 .footer {
@@ -146,10 +145,10 @@ a {
     left:0;
     width:100%;
 }
-#show-scene0 #scroll-sect1 .sticky-elem, 
-#show-scene1 #scroll-sect2 .sticky-elem,
-#show-scene2 #scroll-sect3 .sticky-elem,
-#show-scene3 #scroll-sect4 .sticky-elem {
+body#show-scene0 #scroll-sect1 .sticky-elem, 
+body#show-scene1 #scroll-sect2 .sticky-elem,
+body#show-scene2 #scroll-sect3 .sticky-elem,
+body#show-scene3 #scroll-sect4 .sticky-elem {
     display:block;
 }
 
@@ -166,7 +165,7 @@ a {
     .description span {
         font-size:6rem;
     }
-    #scroll-sect2 .main-message {
+    #scroll-sect3 .main-message {
         font-size:6vw;
     }
     .main-message small {
