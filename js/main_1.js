@@ -21,9 +21,11 @@
             },
             values: {
                 messageA_opacity_in: [0, 1, {start: 0.1, end: 0.2}],
-                messageB_opacity_out: [0, 1, {start: 0.3, end: 0.4}],
+                // messageB_opacity_out: [0, 1, {start: 0.3, end: 0.4}],
+                messageA_transY_in: [20, 0, {start: 0.1, end: 0.2}],
 
                 messageA_opacity_out: [1, 0, {start: 0.25, end: 0.3}],
+                messageA_transY_out: [0, -20, {start: 0.25, end: 0.3}],
             },
         },
         {
@@ -58,7 +60,16 @@
     function setLayout() {
         // 각 스크롤 섹션의  높이 세팅
         for (let i = 0; i < sceneInfo.length; i++) {
-            sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight;
+            if (sceneInfo[i].type === 'sticky') {
+
+                sceneInfo[i].scrollHeight = sceneInfo[i].heightNum * window.innerHeight;
+                
+            } else if (sceneInfo[i].type === 'normal') {
+                
+                sceneInfo[i].scrollHeight =  sceneInfo[i].objs.container.offsetHeight;
+                // element.offsetWidth는 margin을 제외한, padding값, border값까지 계산한 값을 가져옴
+                
+            }
             sceneInfo[i].objs.container.style.height = `${sceneInfo[i].scrollHeight}px`;
         }
 
@@ -91,7 +102,6 @@
             const partScrollHeight = partScrollEnd - partScrollStart;
 
             if (currYOffset >= partScrollStart && currYOffset <= partScrollEnd) {
-                console.log(123);
                 rv = (currYOffset - partScrollStart) / partScrollHeight * (values[1] - values[0]) + values[0];
             } else if (currYOffset < partScrollHeight) {
                 rv  = values[0];
@@ -114,22 +124,19 @@
         const scrollHeight = sceneInfo[currScene].scrollHeight;
         const scrollRatio = currYOffset / scrollHeight;
 
-
         // console.log(currScene, currYOffset);
 
         switch (currScene) {
             case 0:
                 // console.log(0);
-                const messageA_opacity_in = calcValues(values.messageA_opacity_in, currYOffset);
-                const messageA_opacity_out = calcValues(values.messageA_opacity_out, currYOffset);
-
-
                 if (scrollRatio <= 0.22) {
                     // in
-                    objs.messageA.style.opacity = messageA_opacity_in;
+                    objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currYOffset);
+                    objs.messageA.style.transform = `translateY(${calcValues(values.messageA_transY_in, currYOffset)}%)`;
                 } else {
                     // out
-                    objs.messageA.style.opacity = messageA_opacity_out;
+                    objs.messageA.style.opacity = calcValues(values.messageA_opacity_out, currYOffset);
+                    objs.messageA.style.transform = `translateY(${calcValues(values.messageA_transY_out, currYOffset)}%)`;
                 }
                 break;
 

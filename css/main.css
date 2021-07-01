@@ -113,6 +113,14 @@ a {
     height:100px;
     background-color:rgb(29, 29, 31);
 }
+#scroll-sect3 .b {
+    top:10%;
+    left:40%;
+}
+#scroll-sect3 .c {
+    top:15%;
+    left:45%;
+}
 .mid-message {
     max-width:1000px;
     margin:0 auto;
@@ -173,6 +181,13 @@ body#show-scene3 #scroll-sect4 .sticky-elem {
     }
     .desc-message {
         width:20%;
+    }
+    #scroll-sect3 .b {
+        top:20%;
+        left:53%;
+    }
+    #scroll-sect3 .c {
+        left:55%;
     }
     .mid-message {
         font-size:4vw;
