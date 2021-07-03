@@ -279,6 +279,7 @@
             case 0:
                 const messageA_opacity_in = calcValues(values.messageA_opacity_in, currYOffset);
                 const messageA_opacity_out = calcValues(values.messageA_opacity_out, currYOffset);
+                // 오류가 난 이유: 오타가 있었다...... trnas가 아니라 trans인데........................................
                 const messageA_transY_in = calcValues(values.messageA_trnasY_in, currYOffset);
                 const messageA_transY_out = calcValues(values.messageA_transY_out, currYOffset);
                 
