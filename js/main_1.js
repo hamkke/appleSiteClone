@@ -25,6 +25,7 @@
             values: {
                 videoImagesCount: 300,
                 imagesSequence: [0, 299],
+                canvas_opacity: [1, 0, {start: 0.9, end: 0.93}],
                 messageA_opacity_in: [0, 1, {start: 0.1, end: 0.2}],
                 messageB_opacity_in: [0, 1, { start: 0.3, end: 0.4 }],
                 messageC_opacity_in: [0, 1, { start: 0.5, end: 0.6 }],
@@ -67,9 +68,18 @@
                 messageB: document.querySelector('#scroll-sect3 .b'),
                 messageC: document.querySelector('#scroll-sect3 .c'),
                 pinB: document.querySelector('#scroll-sect3 .b .pin'),
-                pinC: document.querySelector('#scroll-sect3 .c .pin')
+                pinC: document.querySelector('#scroll-sect3 .c .pin'),
+
+                canvas: document.querySelector('#video-canvas-1'),
+                context: document.querySelector('#video-canvas-1').getContext('2d'),
+                videoImages: [], // 이미지 시퀀스를 넣는 배열
             },
             values: {
+                videoImagesCount: 960,
+                imagesSequence: [0, 959],
+                canvas_opacity_in: [0, 1, {start: 0, end: 0.1}],
+                canvas_opacity_out: [1, 0, {start: 0.95, end: 1}],
+
                 messageA_transY_in: [20, 0, { start: 0.15, end: 0.2 }],
                 messageB_transY_in: [30, 0, { start: 0.5, end: 0.55 }],
                 messageC_transY_in: [30, 0, { start: 0.72, end: 0.77 }],
@@ -119,7 +129,15 @@
             imgElem.src = `../image/001/IMG_${6726 + i}.JPG`;
             sceneInfo[0].objs.videoImages.push(imgElem);
         }
-        console.log(sceneInfo[0].objs.videoImages);
+
+        let imgElem2;
+        for (let i = 0; i < sceneInfo[2].values.videoImagesCount; i++) {
+            // imgElem = document.createElement('img'); 이거써도되고 new img()써도되고 아무거나 써
+            imgElem2 = new Image();
+            imgElem2.src = `../image/002/IMG_${7027 + i}.JPG`;
+            sceneInfo[2].objs.videoImages.push(imgElem2);
+        }
+        // console.log(sceneInfo[0].objs.videoImages);
     }
     setCanvasImages();
 
@@ -155,6 +173,7 @@
 
         const heightRatio = window.innerHeight / 1080;
         sceneInfo[0].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`;
+        sceneInfo[2].objs.canvas.style.transform = `translate3d(-50%, -50%, 0) scale(${heightRatio})`;
     }
 
     function calcValues(values, currYOffset) {
@@ -203,6 +222,7 @@
                 let sequence = Math.round(calcValues(values.imagesSequence, currYOffset));
                 // console.log(sequence); // 소수점이 나옴 정수로 만들기
                 objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                objs.canvas.style.opacity = (calcValues(values.canvas_opacity, currYOffset));
 
                 if (scrollRatio <= 0.22) {
                     // in
@@ -254,6 +274,18 @@
 
             case 2:
                 // console.log(2);
+                let sequence2 = Math.round(calcValues(values.imagesSequence, currYOffset));
+                // console.log(sequence); // 소수점이 나옴 정수로 만들기
+                objs.context.drawImage(objs.videoImages[sequence2], 0, 0);
+
+                if (scrollRatio <= 0.5) {
+                    // in
+                    objs.canvas.style.opacity = calcValues(values.canvas_opacity_in, currYOffset);
+                } else {
+                    // out
+                    objs.canvas.style.opacity = calcValues(values.canvas_opacity_out, currYOffset);
+                }
+
                 if (scrollRatio <= 0.32) {
                     // in
                     objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currYOffset);
@@ -324,7 +356,12 @@
         yOffset = window.pageYOffset;
         scrollLoop();
     });
+    window.addEventListener('load', () => { // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
+        setLayout();
+        // 페이지 시작했을 때도 이미지가 나오게 하기
+        sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);
+    }); 
+    
     window.addEventListener('resize', setLayout);
-    window.addEventListener('load', setLayout); // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
 
 })();

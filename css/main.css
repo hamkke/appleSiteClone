@@ -61,13 +61,15 @@ a {
 }
 
 .scroll-sect {
-    border:3px solid red; /*임시*/
     padding-top:50vh;
 }
 
 #scroll-sect1 h1 {
+    position:relative;
+    top:-10vh; /*창 높이의 10%라는 말*/
     font-size:4rem;
     text-align:center;
+    z-index:5;
 }
 .main-message {
     display:flex;
@@ -109,6 +111,7 @@ a {
 .desc-message {
     width:50%;
     font-weight:bold;
+    opacity:0;
 }
 .pin {
     width:1px;
