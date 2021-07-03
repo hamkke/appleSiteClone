@@ -152,7 +152,9 @@
 
             if (currYOffset >= partScrollStart && currYOffset <= partScrollEnd) {
                 rv = (currYOffset - partScrollStart) / partScrollHeight * (values[1] - values[0]) + values[0];
-            } else if (currYOffset < partScrollHeight) {
+            } else if (currYOffset < partScrollStart) {
+                // 섹션0에서 스크롤in, out한 후 텍스트들의 잔상이 남은 이유는 또 오타
+                // SrollHeight가 아니라 SrollStart였음
                 rv  = values[0];
             } else if (currYOffset > partScrollEnd) {
                 rv = values[1];
@@ -181,11 +183,13 @@
                 if (scrollRatio <= 0.22) {
                     // in
                     objs.messageA.style.opacity = calcValues(values.messageA_opacity_in, currYOffset);
-                    objs.messageA.style.transform = `translateY(${calcValues(values.messageA_transY_in, currYOffset)}%)`;
+                    objs.messageA.style.transform = `translat3d(${calcValues(values.messageA_transY_in, currYOffset)}%)`;
+                    // 원래는 translatY였는 데 왜 3d로 바꿨냐면 3d는 브라우저 업데이트에 따라 달라질 수 있지만 
+                    // 3d가 붙은애들은 하드웨어 가속이 보장되어 있어 퍼포먼스가 좋아서 바꿈, 애플도 이렇게 사용하고 있음
                 } else {
                     // out
                     objs.messageA.style.opacity = calcValues(values.messageA_opacity_out, currYOffset);
-                    objs.messageA.style.transform = `translateY(${calcValues(values.messageA_transY_out, currYOffset)}%)`;
+                    objs.messageA.style.transform = `translat3d(${calcValues(values.messageA_transY_out, currYOffset)}%)`;
                 }
 
                 if (scrollRatio <= 0.42) {
@@ -236,7 +240,7 @@
                     objs.messageA.style.transform = `translate3d(0, ${calcValues(values.messageA_transY_out, currYOffset)}%, 0)`;
                 }
     
-                if (scrollRatio <= 0.67) {
+                if (scrollRatio <= 0.52) {
                     // in
                     objs.messageB.style.transform = `translate3d(0, ${calcValues(values.messageB_transY_in, currYOffset)}%, 0)`;
                     objs.messageB.style.opacity = calcValues(values.messageB_opacity_in, currYOffset);
@@ -248,7 +252,7 @@
                     objs.pinB.style.transform = `scaleY(${calcValues(values.pinB_scaleY, currYOffset)})`;
                 }
     
-                if (scrollRatio <= 0.93) {
+                if (scrollRatio <= 0.88) {
                     // in
                     objs.messageC.style.transform = `translate3d(0, ${calcValues(values.messageC_transY_in, currYOffset)}%, 0)`;
                     objs.messageC.style.opacity = calcValues(values.messageC_opacity_in, currYOffset);
