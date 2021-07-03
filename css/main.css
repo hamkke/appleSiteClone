@@ -25,6 +25,7 @@ a {
     width:100%;
     height:44px;
     padding: 0 1rem;
+    z-index:10;
 }
 .local-nav {
     position:absolute;
@@ -34,6 +35,7 @@ a {
     height:52px;
     padding: 0 1rem;
     border-bottom:1px solid #eee;
+    z-index:11;
 }
 .global-nav-links,
 .local-nav-links {
@@ -158,6 +160,18 @@ body#show-scene1 #scroll-sect2 .sticky-elem,
 body#show-scene2 #scroll-sect3 .sticky-elem,
 body#show-scene3 #scroll-sect4 .sticky-elem {
     display:block;
+}
+
+.sticky-elem-canvas {
+    top:0;
+    height:100%;
+}
+.sticky-elem-canvas canvas {
+    position:absolute;
+    /*js에서 scale이 조정되었기 때문에 top:0을 해도 맨 위로 안올라감*/
+    top:50%;
+    left:50%;
+    /*transform:translate3d(-50%, -50%, 0); 을 css에서 처리하는게 아니라 main.js에서 처리*/
 }
 
 @media (min-width:1024px) {
