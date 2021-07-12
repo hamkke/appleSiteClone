@@ -25,7 +25,7 @@
             values: {
                 videoImagesCount: 300,
                 imagesSequence: [0, 299],
-                canvas_opacity: [1, 0, {start: 0.9, end: 0.93}],
+                canvas_opacity: [1, 0, {start: 0.9, end: 1}],
                 messageA_opacity_in: [0, 1, {start: 0.1, end: 0.2}],
                 messageB_opacity_in: [0, 1, { start: 0.3, end: 0.4 }],
                 messageC_opacity_in: [0, 1, { start: 0.5, end: 0.6 }],
@@ -114,6 +114,13 @@
             objs: {
                 container: document.querySelector('#scroll-sect4'),
                 canvasCaption: document.querySelector('.canvas-caption'),
+                canvas: document.querySelector('.image-blend-canvas'),
+                context: document.querySelector('.image-blend-canvas').getContext('2d'),     
+                imagesPath: [
+                    '../image/blend-image-1.jpg',
+                    '../image/blend-image-2.jpg',
+                ],
+                images: [],
             },
             values: {
 
@@ -138,6 +145,13 @@
             sceneInfo[2].objs.videoImages.push(imgElem2);
         }
         // console.log(sceneInfo[0].objs.videoImages);
+        let imgElem3;
+        for (let i = 0; i < sceneInfo[3].objs.imagesPath.length; i++) {
+            imgElem3 = new Image();
+            imgElem3.src = sceneInfo[3].objs.imagesPath[i];
+            sceneInfo[3].objs.images.push(imgElem3);
+        }
+        // console.log(sceneInfo[3].objs.images);
     }
     setCanvasImages();
 
@@ -323,6 +337,24 @@
 
             case 3:
                 // console.log(3);
+                // 기기들의 화면 비율이 다 다르기 때문에 play함수에서 스크롤 될 때 화면에 가로,세로 꽉 차게 하기 위해 여기서 세팅
+                const widthRatio = window.innerWidth / objs.canvas.width;
+                const heightRatio = window.innerHeight / objs.canvas.height;
+                // console.log(widthRatio, heightRatio);
+                let canvasScaleRatio;
+
+                if (widthRatio <= heightRatio) {
+                    // 캔버스보다 브라우저 창이 홀쭉한 경우
+                    canvasScaleRatio = heightRatio;
+                    console.log('height');
+                } else {
+                    // 캔버스보다 브라우저 창이 납작한 경우
+                    canvasScaleRatio = widthRatio;
+                    console.log('width');
+                }
+                objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
+                objs.context.drawImage(objs.images[0], 0, 0);
+
                 break;
         }
     }
