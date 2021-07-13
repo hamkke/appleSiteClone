@@ -123,7 +123,9 @@
                 images: [],
             },
             values: {
-
+                rect1X: [0, 0, {start:0, end:0}],
+                rect2X: [0, 0, {start:0, end:0}],
+                //왜 다 0이냐?  우리가 화면크기를 알 수 없기 때문에, 그래서 스크롤 할 때 판단 후 계산하도록 만듦, 미리 자리 만들어 놓고 값 갱신
             },
         },
     ];
@@ -346,14 +348,30 @@
                 if (widthRatio <= heightRatio) {
                     // 캔버스보다 브라우저 창이 홀쭉한 경우
                     canvasScaleRatio = heightRatio;
-                    console.log('height');
+                    // console.log('height');
                 } else {
                     // 캔버스보다 브라우저 창이 납작한 경우
                     canvasScaleRatio = widthRatio;
-                    console.log('width');
+                    // console.log('width');
                 }
                 objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
                 objs.context.drawImage(objs.images[0], 0, 0);
+
+                // 캔버스 사이즈에 맞춰 가정한 innerWidth와 innerHeight
+                const recalculatedInnerhWidth = window.innerWidth / canvasScaleRatio;
+                const recalculatedInnerHeight = window.innerHeight / canvasScaleRatio;
+                // console.log(recalculatedInnerHeight, recalculatedInnerhWidth);
+                const whiteRectWidth = recalculatedInnerhWidth * 0.15;
+                
+                values.rect1X[0] = (objs.canvas.width - recalculatedInnerhWidth) / 2; // 출발값
+                values.rect1X[1] = values.rect1X[0] - widthRectWidth; // 최종값
+                values.rect2X[0] = values.rect1X[0] + recalculatedInnerhWidth + whiteRectWidth;
+                values.rect2X[1] = values.rect2X[0] + whiteRectWidth;
+
+                // 좌우 흰색 박스 그리기
+                // fillRect메서드가 canvas에서 사각형를 그리는 메서드임
+                objs.context.fillRect(values.rect1X[0], 0, paresInt(whiteRectWidth), recalculatedInnerHeight);
+                objs.context.fillRect(values.rect2X[0], 0, paresInt(whiteRectWidth), recalculatedInnerHeight);
 
                 break;
         }
@@ -397,3 +415,10 @@
     window.addEventListener('resize', setLayout);
 
 })();
+
+// 21.07.13
+// 초반 부분은 이해했지만 뒤로 가면서 이해하지 못했다. 그냥 따라 치고 있다.
+// 그래서 두가지 방법 중 하나를 먼저 해볼려고 한다
+// 일단 처음부터 끝까지 다 보고 다시 처음부터 시작하기
+// 이게 안되면 처음부터 다시 이해가 안되는 부분을 짚고 넘어가면 된다.
+// 따라쟁이말고 개발자가 되고 싶으니께
