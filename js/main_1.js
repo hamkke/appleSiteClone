@@ -126,6 +126,7 @@
                 rect1X: [0, 0, {start:0, end:0}],
                 rect2X: [0, 0, {start:0, end:0}],
                 //왜 다 0이냐?  우리가 화면크기를 알 수 없기 때문에, 그래서 스크롤 할 때 판단 후 계산하도록 만듦, 미리 자리 만들어 놓고 값 갱신
+                rectStartY: 0,
             },
         },
     ];
@@ -355,23 +356,53 @@
                     // console.log('width');
                 }
                 objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
+                objs.context.fillStyle = "#fff";
                 objs.context.drawImage(objs.images[0], 0, 0);
 
                 // 캔버스 사이즈에 맞춰 가정한 innerWidth와 innerHeight
-                const recalculatedInnerhWidth = window.innerWidth / canvasScaleRatio;
+                // 크롬에서 는 스크롤바가 공간을 차지하고 있기 때문에 nnerWidth를 쓰면  값의 오차가 생긴다 그래서 body.offsetWidth사용
+                const recalculatedInnerhWidth = document.body.offsetWidth / canvasScaleRatio;
                 const recalculatedInnerHeight = window.innerHeight / canvasScaleRatio;
                 // console.log(recalculatedInnerHeight, recalculatedInnerhWidth);
                 const whiteRectWidth = recalculatedInnerhWidth * 0.15;
                 
-                values.rect1X[0] = (objs.canvas.width - recalculatedInnerhWidth) / 2; // 출발값
-                values.rect1X[1] = values.rect1X[0] - widthRectWidth; // 최종값
-                values.rect2X[0] = values.rect1X[0] + recalculatedInnerhWidth + whiteRectWidth;
+                values.rect1X[0] = (objs.canvas.width - recalculatedInnerhWidth) / 2; // 출발값, objs.canvas.width는 1920고정값
+                values.rect1X[1] = values.rect1X[0] - whiteRectWidth; // 최종값
+                values.rect2X[0] = values.rect1X[0] + recalculatedInnerhWidth - whiteRectWidth;
                 values.rect2X[1] = values.rect2X[0] + whiteRectWidth;
 
+                // console.log(objs.canvas.getBoundingClientRect());
+
+                // getBoundingClientRect()값이 한번만 출력되도록 하기, 
+                if (!values.rectStartY) {
+                    // values.rectStartY = objs.canvas.getBoundingClientRect().top;
+                    // 단점이 속도에 따라 스크롤 값이 달라진다 = 정확한 기준이 못 된다, 그래서 offsetTop사용
+                    values.rectStartY = objs.canvas.offsetTop + (objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2; // 캔버스 원래 높이 - 줄어든 캔버스 높이
+                    // console.log(values.rectStartY);
+                    values.rect1X[2].start = (window.innerHeight / 2) / scrollHeight;
+                    values.rect2X[2].start = (window.innerHeight / 2) / scrollHeight;
+                    values.rect1X[2].end = values.rectStartY / scrollHeight;
+                    values.rect2X[2].end = values.rectStartY / scrollHeight;
+                }
+
                 // 좌우 흰색 박스 그리기
-                // fillRect메서드가 canvas에서 사각형를 그리는 메서드임
-                objs.context.fillRect(values.rect1X[0], 0, paresInt(whiteRectWidth), recalculatedInnerHeight);
-                objs.context.fillRect(values.rect2X[0], 0, paresInt(whiteRectWidth), recalculatedInnerHeight);
+                // fillRect메서드가 canvas에서 사각형를 그리는 메서드임, fillRect(x, y, width, height)
+                // objs.canvas.height = recalculatedInnerHeight
+
+                // objs.context.fillRect(values.rect1X[0], 0, parseInt(whiteRectWidth), recalculatedInnerHeight); 
+                // objs.context.fillRect(values.rect2X[0], 0, parseInt(whiteRectWidth), objs.canvas.height);
+                // fillRect가 잘 되는지 확인하기 위해 x값에 values.rect1X[0]을 넣었지만 애니메이션이 되야 하기 때문에 아래 코드롤 변경
+
+                objs.context.fillRect(
+                    parseInt(calcValues(values.rect1X, currYOffset)),
+                    0,
+                    parseInt(whiteRectWidth),
+                    objs.canvas.height);
+                objs.context.fillRect(
+                    parseInt(calcValues(values.rect2X, currYOffset)),
+                    0,
+                    parseInt(whiteRectWidth),
+                    objs.canvas.height);
 
                 break;
         }
@@ -380,11 +411,12 @@
     function scrollLoop () {
         enterNScene = false;
         prevScrollHeight = 0;
-        for (let i =0; i < currScene; i++) {
-            prevScrollHeight = prevScrollHeight + sceneInfo[i].scrollHeight;
-        }
 
+        for (let i =0; i < currScene; i++) {
+            prevScrollHeight += sceneInfo[i].scrollHeight;
+        }
         if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
+        // if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
             enterNScene = true;
             currScene++;
             document.body.setAttribute('id', `show-scene${currScene}`)
