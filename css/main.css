@@ -177,6 +177,10 @@ body#show-scene3 #scroll-sect4 .sticky-elem {
     left:50%;
     /*transform:translate3d(-50%, -50%, 0); 을 css에서 처리하는게 아니라 main.js에서 처리*/
 }
+.image-blend-canvas.sticky {
+    position:fixed;
+    top:0;
+}
 #scroll-sect4 {
     display:flex;
     flex-direction:column;

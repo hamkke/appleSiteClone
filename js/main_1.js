@@ -336,10 +336,66 @@
                     objs.messageC.style.opacity = calcValues(values.messageC_opacity_out, currYOffset);
                     objs.pinC.style.transform = `scaleY(${calcValues(values.pinC_scaleY, currYOffset)})`;
                 }
+
+                // currScene3 에서 쓰는 캔버스 미리 그려주기 시작
+                // case3에서 코드를 복붙하면 case2의 변수들과 충돌이 일어난다
+                if (scrollRatio < 0.9) {
+                    // 그래서 스코프안에서 다시 변수 선언!
+                    const objs = sceneInfo[3].objs;
+                    const values = sceneInfo[3].values;
+                    const widthRatio = window.innerWidth / objs.canvas.width;
+                    const heightRatio = window.innerHeight / objs.canvas.height;
+
+                    let canvasScaleRatio;
+
+                    if (widthRatio <= heightRatio) {
+                        // 캔버스보다 브라우저 창이 홀쭉한 경우
+                        canvasScaleRatio = heightRatio;
+                    } else {
+                        // 캔버스보다 브라우저 창이 납작한 경우
+                        canvasScaleRatio = widthRatio;
+                    }
+                    objs.canvas.style.transform = `scale(${canvasScaleRatio})`;
+                    objs.context.fillStyle = "#fff";
+                    objs.context.drawImage(objs.images[0], 0, 0);
+
+                    // 캔버스 사이즈에 맞춰 가정한 innerWidth와 innerHeight
+                    // 크롬에서 는 스크롤바가 공간을 차지하고 있기 때문에 nnerWidth를 쓰면  값의 오차가 생긴다 그래서 body.offsetWidth사용
+                    const recalculatedInnerhWidth = document.body.offsetWidth / canvasScaleRatio;
+                    const recalculatedInnerHeight = window.innerHeight / canvasScaleRatio;
+                    // console.log(recalculatedInnerHeight, recalculatedInnerhWidth);
+                    const whiteRectWidth = recalculatedInnerhWidth * 0.15;
+                    
+                    values.rect1X[0] = (objs.canvas.width - recalculatedInnerhWidth) / 2; // 출발값, objs.canvas.width는 1920고정값
+                    values.rect1X[1] = values.rect1X[0] - whiteRectWidth; // 최종값
+                    values.rect2X[0] = values.rect1X[0] + recalculatedInnerhWidth - whiteRectWidth;
+                    values.rect2X[1] = values.rect2X[0] + whiteRectWidth;
+
+                    // 좌우 흰색 박스 그리기
+                    // fillRect메서드가 canvas에서 사각형를 그리는 메서드임, fillRect(x, y, width, height)
+                    // objs.canvas.height = recalculatedInnerHeight
+                    // fillRect가 잘 되는지 확인하기 위해 x값에 values.rect1X[0]을 넣었지만 애니메이션이 되야 하기 때문에 아래 코드롤 변경
+                    // currScene2에서는 애니메이션이아니라 그리기만 하면 되니까 다시 values.rect1X[0]
+                    objs.context.fillRect(
+                        parseInt(values.rect1X[0]),
+                        0,
+                        parseInt(whiteRectWidth),
+                        objs.canvas.height
+                        );
+
+                    objs.context.fillRect(
+                        parseInt(values.rect2X[0]),
+                        0,
+                        parseInt(whiteRectWidth),
+                        objs.canvas.height
+                        );
+                }
+
                 break;
 
             case 3:
                 // console.log(3);
+                let step = 0;
                 // 기기들의 화면 비율이 다 다르기 때문에 play함수에서 스크롤 될 때 화면에 가로,세로 꽉 차게 하기 위해 여기서 세팅
                 const widthRatio = window.innerWidth / objs.canvas.width;
                 const heightRatio = window.innerHeight / objs.canvas.height;
@@ -397,13 +453,32 @@
                     parseInt(calcValues(values.rect1X, currYOffset)),
                     0,
                     parseInt(whiteRectWidth),
-                    objs.canvas.height);
+                    objs.canvas.height
+                    );
+
                 objs.context.fillRect(
                     parseInt(calcValues(values.rect2X, currYOffset)),
                     0,
                     parseInt(whiteRectWidth),
-                    objs.canvas.height);
-
+                    objs.canvas.height
+                    );
+                    
+                    // 캔버스가 브라우저 상단에 닿지 않았다면 = step = 1 
+                    // = scrollRatio가 애니메이션이 끝나는 end시점 보다 작다
+                    // (=scrollRatio는 현재씬에서 얼마나 스크롤 했는지 비율로 나타내는 값)
+                    if (scrollRatio < values.rect1X[2].end) {
+                        step = 1;
+                        // console.log('캔버스 닿기 전');
+                        objs.canvas.classList.remove('sticky');
+                    } else {
+                        step =2;
+                        // 이미지 블랜드
+                        // console.log('캔버스 닿은 후');
+                        // 캔버스가 닿은 후 가장 먼저할 일은 canvas의 position을 fixed로 바꾸기
+                        objs.canvas.classList.add('sticky');
+                        objs.canvas.style.top = `${-(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
+                        // 원래 캔버스 크기 - 조정된 캔버스 크기 /2인데 위로 움직여야 하기 때문에 마이너스 붙여주기
+                    }
                 break;
         }
     }
