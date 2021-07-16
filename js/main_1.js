@@ -123,10 +123,12 @@
                 images: [],
             },
             values: {
+                //왜 다 0이냐?  우리가 화면크기를 알 수 없기 때문에, 그래서 스크롤 할 때 판단 후 계산하도록 만듦, 미리 자리 만들어 놓고 값 갱신
                 rect1X: [0, 0, {start:0, end:0}],
                 rect2X: [0, 0, {start:0, end:0}],
-                //왜 다 0이냐?  우리가 화면크기를 알 수 없기 때문에, 그래서 스크롤 할 때 판단 후 계산하도록 만듦, 미리 자리 만들어 놓고 값 갱신
                 rectStartY: 0,
+
+                blendHeight: [0, 0, {start:0, end:0}],
             },
         },
     ];
@@ -472,12 +474,29 @@
                         objs.canvas.classList.remove('sticky');
                     } else {
                         step =2;
-                        // 이미지 블랜드
                         // console.log('캔버스 닿은 후');
+                        // 이미지 블랜드
                         // 캔버스가 닿은 후 가장 먼저할 일은 canvas의 position을 fixed로 바꾸기
                         objs.canvas.classList.add('sticky');
                         objs.canvas.style.top = `${-(objs.canvas.height - objs.canvas.height * canvasScaleRatio) / 2}px`;
-                        // 원래 캔버스 크기 - 조정된 캔버스 크기 /2인데 위로 움직여야 하기 때문에 마이너스 붙여주기
+                        // 원래 캔버스 크기 - 조정된 캔버스 크기 나누기 2인데 위로 움직여야 하기 때문에 마이너스 붙여주기
+
+                        // blendHeight: [0, 0, {start:0, end:0}],
+                        values.blendHeight[0] = 0;
+                        values.blendHeight[1] = objs.canvas.height;
+                        values.blendHeight[2].start = values.rect1X[2].end // 시작되는 순간: 캔버스가 상단에 닿은 직후
+                        values.blendHeight[2].end = values.rect1X[2].start + 0.2; // 끝나는 순간: 스크롤 속도를 빠르게 할지 느리게 할지 내가 정하면 된다.
+
+                        const blendHeight = calcValues(values.blendHeight, currYOffset);
+                        // objs.context.drawImage(img, x, y, width, height);
+                        objs.context.drawImage(objs.images[1],
+                            // void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+                            // sx, sy 의 s는 source, dx, dy의 d는 destination
+                            // y좌표는 캔버스height 빼기 blendHeight
+                            0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight, // 소스이미지
+                            0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight // 실제로 그려지는 부분 
+                            // 왜 수치가 똑깥냐? 원래이미지랑 캔버스크기를 처음부터 맞춰놨으니께(계산이 편해진다~~)
+                            );
                     }
                 break;
         }
