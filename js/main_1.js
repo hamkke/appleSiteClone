@@ -129,6 +129,7 @@
                 rectStartY: 0,
 
                 blendHeight: [0, 0, {start:0, end:0}],
+                canvas_scale: [0, 0, {start:0, end:0}],
             },
         },
     ];
@@ -486,7 +487,7 @@
                         values.blendHeight[1] = objs.canvas.height;
                         values.blendHeight[2].start = values.rect1X[2].end // 시작되는 순간: 캔버스가 상단에 닿은 직후
                         values.blendHeight[2].end = values.rect1X[2].start + 0.2; // 끝나는 순간: 스크롤 속도를 빠르게 할지 느리게 할지 내가 정하면 된다.
-
+                        
                         const blendHeight = calcValues(values.blendHeight, currYOffset);
                         // objs.context.drawImage(img, x, y, width, height);
                         objs.context.drawImage(objs.images[1],
@@ -497,6 +498,22 @@
                             0, objs.canvas.height - blendHeight, objs.canvas.width, blendHeight // 실제로 그려지는 부분 
                             // 왜 수치가 똑깥냐? 원래이미지랑 캔버스크기를 처음부터 맞춰놨으니께(계산이 편해진다~~)
                             );
+
+                            if (scrollRatio > values.blendHeight[2].end) {
+                                values.canvas_scale[0] = canvasScaleRatio;
+                                values.canvas_scale[1] = document.body.offsetWidth / (1.5 * objs.canvas.width);
+                                // values.canvas_scale[1] = document.body.offsetWidth / objs.canvas.width;
+                                // 왜 곱하기 1.5? 분수니까 분모의 값을 증가시켜서 결과값을 작게 만듦
+                                // 왜 작게 만드나? 
+                                // 곱하기전 시작값과 마지막점의 차이 별로 안나 애니메이션 비율간 차이가 작음, 곱합으로써 비율간 차이가 커짐
+                                // 곱하기 전 - values.canvas_scale[0]: 0.85, values.canvas_scale[1]: 0.3
+                                // 곱하기 후 - values.canvas_scale[0]: 0.85, values.canvas_scale[1]: 0.2
+                                // console.log(values.canvas_scale[0], ":",values.canvas_scale[1]); 
+                                values.canvas_scale[2].start = values.blendHeight[2].end;
+                                values.canvas_scale[2].end = values.canvas_scale[2].start + 0.2;
+                                
+                                objs.canvas.style.transform = `scale(${calcValues(values.canvas_scale, currYOffset)})`;
+                            }
                     }
                 break;
         }
