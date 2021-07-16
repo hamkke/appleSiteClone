@@ -130,6 +130,8 @@
 
                 blendHeight: [0, 0, {start:0, end:0}],
                 canvas_scale: [0, 0, {start:0, end:0}],
+                canvasCaption_opacity: [0, 1, {start:0, end:0}],
+                canvasCaption_translateY: [20, 0, {start:0, end:0}],
             },
         },
     ];
@@ -513,6 +515,19 @@
                                 values.canvas_scale[2].end = values.canvas_scale[2].start + 0.2;
                                 
                                 objs.canvas.style.transform = `scale(${calcValues(values.canvas_scale, currYOffset)})`;
+                                objs.canvas.style.marginTop = 0;
+                            }
+
+                            if (scrollRatio > values.canvas_scale[2].end && values.canvas_scale[2].end > 0) {
+                                // console.log('스크롤 시작');
+                                objs.canvas.classList.remove('sticky');
+                                objs.canvas.style.marginTop = `${scrollHeight * 0.4}px`;
+                                
+                                values.canvasCaption_opacity[2].start = values.canvas_scale[2].end;
+                                values.canvasCaption_opacity[2].end = values.canvasCaption_opacity.start + 0.1;
+                                objs.canvasCaption.style.opacity = calcValues(values.canvasCaption_opacity, currYOffset);
+                                objs.canvasCaption.style.transform = `translated3d(0, ${calcValues(values.canvasCaption_translateY, currYOffset)}%, 0)`;
+                            
                             }
                     }
                 break;
