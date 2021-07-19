@@ -1,8 +1,8 @@
 //오류를 못 찾아서 세번 째 다시 시작21.06.30
 (() => {
 
-    let YOffset = 0; // pageYOffset 대신 쓸 변수
-    let prevScrollHeight = 0; // 현재 스크롤 위치(YOffset)보다 이전에 위치한 스크롤 섹션들의 높이값의 합
+    let yOffset = 0; // pageYOffset 대신 쓸 변수
+    let prevScrollHeight = 0; // 현재 스크롤 위치(yOffset)보다 이전에 위치한 스크롤 섹션들의 높이값의 합
     let currScene = 0; // 현재 활성화 된 씬(scroll-sect)
     let enterNScene = false; // 새로운 씬이 시작된 순간 true가 되는 애
 
@@ -162,6 +162,17 @@
         // console.log(sceneInfo[3].objs.images);
     }
     setCanvasImages();
+
+    function cheakMenu() {
+        let nAv = document.querySelector('.global-nav').style.height;
+        // 왜 innerHeight는 안되는 걸까?
+        console.log(nAv);
+        if (yOffset > nAv) {
+            document.body.classList.add('local-nav-sticky');
+        } else {
+            document.body.classList.remove('local-nav-sticky');
+        }
+    }
 
     function setLayout() {
         // 각 스크롤 섹션의  높이 세팅
@@ -521,12 +532,15 @@
                             if (scrollRatio > values.canvas_scale[2].end && values.canvas_scale[2].end > 0) {
                                 // console.log('스크롤 시작');
                                 objs.canvas.classList.remove('sticky');
-                                objs.canvas.style.marginTop = `${scrollHeight * 0.4}px`;
+                                objs.canvas.style.marginTop = `${scrollHeight * 0.38}px`;
                                 
                                 values.canvasCaption_opacity[2].start = values.canvas_scale[2].end;
-                                values.canvasCaption_opacity[2].end = values.canvasCaption_opacity.start + 0.1;
+                                values.canvasCaption_opacity[2].end = values.canvasCaption_opacity[2].start + 0.1;
                                 objs.canvasCaption.style.opacity = calcValues(values.canvasCaption_opacity, currYOffset);
-                                objs.canvasCaption.style.transform = `translated3d(0, ${calcValues(values.canvasCaption_translateY, currYOffset)}%, 0)`;
+
+                                values.canvasCaption_translateY[2].start = values.canvasCaption_opacity[2].start;
+                                values.canvasCaption_translateY[2].end = values.canvasCaption_opacity[2].end;
+                                objs.canvasCaption.style.transform = `translate3d(0, ${calcValues(values.canvasCaption_translateY, currYOffset)*2}%, 0)`;
                             
                             }
                     }
@@ -563,6 +577,7 @@
     window.addEventListener('scroll', () => { 
         yOffset = window.pageYOffset;
         scrollLoop();
+        cheakMenu();
     });
     window.addEventListener('load', () => { // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
         setLayout();
