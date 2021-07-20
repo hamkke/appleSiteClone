@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>requestAnimationFrame?</title>
+    <style>
+        .txt {
+            margin-top:25vh;
+            text-align:center;
+            font-size:3rem;
+            color:blueviolet;
+        }
+        .box {
+            position:absolute;
+            left:50%;
+            bottom:0;
+            width:100px;
+            height:100px;
+            border:5px solid #000;
+            transform:translate(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="txt">requestAnimationFrame이란 무엇일까?</div>
+    <div class="box"></div>
+
+    <script>
+        const txt = document.querySelector('.txt');
+        const box = document.querySelector('.box');
+        let yBottom = 0;
+        let rafId;
+
+        function render() {
+            txt.innerHTML = yBottom;
+            box.style.bottom = `${yBottom}px`;
+            yBottom += 10;
+
+            rafId = requestAnimationFrame(render);
+
+            if (yBottom > 500) {
+                cancelAnimationFrame(rafId);
+            }
+        }
+
+        render();
+
+        window.addEventListener('click', () => {
+            cancelAnimationFrame(rafId);
+        })
+    </script>
+</body>
+</html>

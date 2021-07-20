@@ -6,6 +6,11 @@
     let currScene = 0; // 현재 활성화 된 씬(scroll-sect)
     let enterNScene = false; // 새로운 씬이 시작된 순간 true가 되는 애
 
+    let acc = 0.1;
+    let delayedYOffset = 0;
+    let rafId;
+    let rafState;
+
     const sceneInfo = [
         {
             // 0섹션
@@ -141,7 +146,7 @@
         for (let i = 0; i < sceneInfo[0].values.videoImagesCount; i++) {
             // imgElem = document.createElement('img'); 이거써도되고 new img()써도되고 아무거나 써
             imgElem = new Image();
-            imgElem.src = `../image/001/IMG_${6726 + i}.JPG`;
+            imgElem.src = `../image/001/IMG_${6726 + i}.jpg`;
             sceneInfo[0].objs.videoImages.push(imgElem);
         }
 
@@ -149,7 +154,7 @@
         for (let i = 0; i < sceneInfo[2].values.videoImagesCount; i++) {
             // imgElem = document.createElement('img'); 이거써도되고 new img()써도되고 아무거나 써
             imgElem2 = new Image();
-            imgElem2.src = `../image/002/IMG_${7027 + i}.JPG`;
+            imgElem2.src = `../image/002/IMG_${7027 + i}.jpg`;
             sceneInfo[2].objs.videoImages.push(imgElem2);
         }
         // console.log(sceneInfo[0].objs.videoImages);
@@ -161,10 +166,9 @@
         }
         // console.log(sceneInfo[3].objs.images);
     }
-    setCanvasImages();
 
     function cheakMenu() {
-        let nAv = document.querySelector('.global-nav').style.height;
+        let nAv = document.querySelector('.global-nav').clientHeight;
         // 왜 innerHeight는 안되는 걸까?
         console.log(nAv);
         if (yOffset > nAv) {
@@ -252,9 +256,9 @@
         switch (currScene) {
             case 0:
                 // console.log(0);
-                let sequence = Math.round(calcValues(values.imagesSequence, currYOffset));
-                // console.log(sequence); // 소수점이 나옴 정수로 만들기
-                objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                // let sequence = Math.round(calcValues(values.imagesSequence, currYOffset));
+                // // console.log(sequence); // 소수점이 나옴 정수로 만들기
+                // objs.context.drawImage(objs.videoImages[sequence], 0, 0);
                 objs.canvas.style.opacity = (calcValues(values.canvas_opacity, currYOffset));
 
                 if (scrollRatio <= 0.22) {
@@ -307,9 +311,9 @@
 
             case 2:
                 // console.log(2);
-                let sequence2 = Math.round(calcValues(values.imagesSequence, currYOffset));
-                // console.log(sequence); // 소수점이 나옴 정수로 만들기
-                objs.context.drawImage(objs.videoImages[sequence2], 0, 0);
+                // let sequence2 = Math.round(calcValues(values.imagesSequence, currYOffset));
+                // // console.log(sequence); // 소수점이 나옴 정수로 만들기
+                // objs.context.drawImage(objs.videoImages[sequence2], 0, 0);
 
                 if (scrollRatio <= 0.5) {
                     // in
@@ -549,19 +553,20 @@
     }
 
     function scrollLoop () {
+        // enterNScene는 씬이 바뀌는 순간 오차가 생겨, 씬이 바뀌는 순간 playAnimation()함수를 멈추게 하는 애
         enterNScene = false;
         prevScrollHeight = 0;
 
         for (let i =0; i < currScene; i++) {
             prevScrollHeight += sceneInfo[i].scrollHeight;
         }
-        if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
+        if (delayedYOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
         // if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
             enterNScene = true;
             currScene++;
             document.body.setAttribute('id', `show-scene${currScene}`)
         }
-        if (yOffset < prevScrollHeight) {
+        if (delayedYOffset < prevScrollHeight) {
             if (currScene ===0) return; // 브라우저 바운스 효과로 인해 마이너스가 음수가 되는 것을 방지(모바일)
             enterNScene = true;
             currScene--;
@@ -573,11 +578,42 @@
         playAnimation();
     }
 
+    function loop() {
+        delayedYOffset = delayedYOffset + (yOffset - delayedYOffset) * acc;
+
+         // 스크롤 하면서 씬이 바뀔 때 계산오차가 생겨서 끊어지듯 움직임. 그래서 여기도 enterNScene를 똑같이 적용
+        if (!enterNScene) { // true일 때 패스 = false일 때 실행
+            if (currScene === 0 || currScene === 2) {
+                const currYOffset = delayedYOffset - prevScrollHeight;
+                const values = sceneInfo[currScene].values
+                const objs = sceneInfo[currScene].objs;
+                // console.log('loop');
+
+                let sequence = Math.round(calcValues(values.imagesSequence, currYOffset));
+
+                if (objs.videoImages[sequence]) { // 해당하는 시퀀스가 있을때만 그리게 하기
+                    objs.context.drawImage(objs.videoImages[sequence], 0, 0);
+                }
+            }
+        }
+        rafId = requestAnimationFrame(loop);
+
+        if (Math.abs(yOffset - delayedYOffset) < 1) {
+            cancelAnimationFrame(rafId);
+            rafState = false;
+        }
+    }
+
     // ('resize', scrollLoop) 왜 이렇게 안하냐면 다른 이벤트들도 있어서
     window.addEventListener('scroll', () => { 
         yOffset = window.pageYOffset;
         scrollLoop();
         cheakMenu();
+
+        if(!rafState) {
+            rafId = requestAnimationFrame(loop);
+            rafState = true;
+        }
     });
     window.addEventListener('load', () => { // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
         setLayout();
@@ -585,7 +621,17 @@
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);
     }); 
     
-    window.addEventListener('resize', setLayout);
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 600) {
+            setLayout();
+        }
+        sceneInfo[3].values.rectStartY = 0;
+    });
+
+    // 모바일 기기를 방향전환할 때 일어나는 이벤트
+    window.addEventListener('orientationchange' , setLayout);
+
+    setCanvasImages();
 
 })();
 
