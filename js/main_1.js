@@ -536,7 +536,7 @@
                             if (scrollRatio > values.canvas_scale[2].end && values.canvas_scale[2].end > 0) {
                                 // console.log('스크롤 시작');
                                 objs.canvas.classList.remove('sticky');
-                                objs.canvas.style.marginTop = `${scrollHeight * 0.38}px`;
+                                objs.canvas.style.marginTop = `${scrollHeight * 0.4}px`;
                                 
                                 values.canvasCaption_opacity[2].start = values.canvas_scale[2].end;
                                 values.canvasCaption_opacity[2].end = values.canvasCaption_opacity[2].start + 0.1;
@@ -604,33 +604,45 @@
         }
     }
 
-    // ('resize', scrollLoop) 왜 이렇게 안하냐면 다른 이벤트들도 있어서
-    window.addEventListener('scroll', () => { 
-        yOffset = window.pageYOffset;
-        scrollLoop();
-        cheakMenu();
 
-        if(!rafState) {
-            rafId = requestAnimationFrame(loop);
-            rafState = true;
-        }
-    });
     window.addEventListener('load', () => { // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
         setLayout();
+        document.body.classList.remove('before-load');
+        // 여기까지만 하면 opacity만 0이 된거지 없어진거 아니다
+        //document.body.removeChild(e.currentTarget)을 이용해 아예 없애 버리기
+
         // 페이지 시작했을 때도 이미지가 나오게 하기
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);
-    }); 
+
+        // ('resize', scrollLoop) 왜 이렇게 안하냐면 다른 이벤트들도 있어서
+        // 로드 전 스크롤 하면 에러가 생겨서 로드가 끝난 뒤 스크롤이벤트를 실행하면 에러가 안 생긴다
+        window.addEventListener('scroll', () => { 
+            yOffset = window.pageYOffset;
+            scrollLoop();
+            cheakMenu();
+
+            if(!rafState) {
+                rafId = requestAnimationFrame(loop);
+                rafState = true;
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 900) {
+                setLayout();
+                sceneInfo[3].values.rectStartY = 0;
+            }
+        });
     
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 600) {
-            setLayout();
-        }
-        sceneInfo[3].values.rectStartY = 0;
-    });
+        // 모바일 기기를 방향전환할 때 일어나는 이벤트
+        window.addEventListener('orientationchange' , () => {
+            setTimeout(setLayout, 300);
+        });
+        document.body.querySelector('.loading').addEventListener('transitionend', (e) => {
+            document.body.removeChild(e.currentTarget);
+        });
 
-    // 모바일 기기를 방향전환할 때 일어나는 이벤트
-    window.addEventListener('orientationchange' , setLayout);
-
+    }); 
     setCanvasImages();
 
 })();

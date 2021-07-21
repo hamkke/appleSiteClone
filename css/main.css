@@ -17,7 +17,13 @@ a {
     color:rgb(29, 29, 31);
     text-decoration:none;
 }
-
+body.before-load {
+    overflow:hidden;
+}
+.container {
+    /*아이폰 가로 스크롤 방지*/
+    overflow-x:hidden;
+}
 .global-nav {
     position:absolute;
     top:0;
@@ -42,6 +48,9 @@ a {
     top:0;
     background:rgba(255, 255, 255, 0.1);
     backdrop-filter:saturate(180%) blur(15px);
+    -webkit-backdrop-filter:saturate(180%) blur(15px);
+    -moz-backdrop-filter:saturate(180%) blur(15px);
+    -o-backdrop-filter:saturate(180%) blur(15px);
 }
 .global-nav-links,
 .local-nav-links {
@@ -145,7 +154,7 @@ a {
 }
 .canvas-caption {
     max-width:1000px;
-    margin:-8em 0 auto;
+    margin:-24em 0 auto;
     padding:0 1rem;
     color:#888;
     font-size:1.2rem;
@@ -170,6 +179,7 @@ body#show-scene1 #scroll-sect2 .sticky-elem,
 body#show-scene2 #scroll-sect3 .sticky-elem,
 body#show-scene3 #scroll-sect4 .sticky-elem {
     display:block;
+    will-change: transform, opacity; /*값이 변경될 속성에 대한 힌트*/
 }
 
 .sticky-elem-canvas {
@@ -192,6 +202,46 @@ body#show-scene3 #scroll-sect4 .sticky-elem {
     flex-direction:column;
     align-items:center;
 }
+.loading {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:fixed;
+    right:0;
+    left:0;
+    top:0;
+    bottom:0;
+    background:#fff;
+    transition:0.5s;
+    opacity:0;
+    z-index:100;
+}
+body.before-load .loading {
+    opacity:1;
+}
+@keyframes loading-box {
+    100% {transform:rotate(365deg);}
+}
+@keyframes loading-ani {
+    0% {stroke-dashoffset:157;}
+    75% {stroke-dashoffset:-147;}
+    100% {stroke-dashoffset:-157;}
+}
+.loading-circle {
+    width:54px;
+    height:54px;
+    animation:loading-box 3s infinite;
+}
+.loading-circle circle {
+    stroke:#000;
+    stroke-width:4;
+    /*getTotalLength()로 stroke의 길이를 얻어올 수 있음*/
+    stroke-dasharray:157;
+    stroke-dashoffset:-157;
+    fill:transparent; /*#fff보다는 transparent가 낫다*/
+    animation:loading-ani 1s infinite;
+}
+
 @media (min-width:1024px) {
     #scroll-sect1 h1 {
         font-size:9vw;
@@ -228,6 +278,7 @@ body#show-scene3 #scroll-sect4 .sticky-elem {
         font-size:4vw;
     }
     .canvas-caption {
+        margin-top:-8em;
         padding:0;
         font-size:2rem;
     }
