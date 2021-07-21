@@ -181,6 +181,9 @@ body#show-scene3 #scroll-sect4 .sticky-elem {
     display:block;
     will-change: transform, opacity; /*값이 변경될 속성에 대한 힌트*/
 }
+.scroll-effect-end .sticky-elem {
+    display:none !important;
+}
 
 .sticky-elem-canvas {
     top:0;
@@ -216,6 +219,9 @@ body#show-scene3 #scroll-sect4 .sticky-elem {
     opacity:0;
     z-index:100;
 }
+body.before-load .container {
+    display:none;
+}
 body.before-load .loading {
     opacity:1;
 }
@@ -241,7 +247,9 @@ body.before-load .loading {
     fill:transparent; /*#fff보다는 transparent가 낫다*/
     animation:loading-ani 1s infinite;
 }
-
+.normal-content {
+    margin-bottom:10rem;
+}
 @media (min-width:1024px) {
     #scroll-sect1 h1 {
         font-size:9vw;

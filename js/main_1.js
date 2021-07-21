@@ -560,10 +560,19 @@
         for (let i =0; i < currScene; i++) {
             prevScrollHeight += sceneInfo[i].scrollHeight;
         }
+
+        if (delayedYOffset < prevScrollHeight + sceneInfo[currScene].scrollHeight) {
+            document.body.classList.remove('scroll-effect-end');
+        }
         if (delayedYOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
         // if (yOffset > prevScrollHeight + sceneInfo[currScene].scrollHeight) {
             enterNScene = true;
-            currScene++;
+            if (currScene === sceneInfo.length - 1) {
+                document.body.classList.add('scroll-effect-end');
+            }
+            if (currScene < sceneInfo.length - 1) { // 나중에 섹션이 추가 될 때 오류 생기는 걸 방지
+                currScene++;
+            }
             document.body.setAttribute('id', `show-scene${currScene}`)
         }
         if (delayedYOffset < prevScrollHeight) {
@@ -606,13 +615,29 @@
 
 
     window.addEventListener('load', () => { // DOMContentloaded도 사용 가능, 얘는 dom객체들만 로딩되면 실행시킴 그래서 더 빠름, load는 이미지같은 애들 다 로딩이 되야 실행됨
-        setLayout();
         document.body.classList.remove('before-load');
         // 여기까지만 하면 opacity만 0이 된거지 없어진거 아니다
         //document.body.removeChild(e.currentTarget)을 이용해 아예 없애 버리기
+        setLayout();
 
         // 페이지 시작했을 때도 이미지가 나오게 하기
         sceneInfo[0].objs.context.drawImage(sceneInfo[0].objs.videoImages[0], 0, 0);
+
+        let tempYOffset = yOffset;
+        let tempScrollCount = 0;
+        
+        if (yOffset > 0) {
+            let siId = setInterval(() => {
+                window.scrollTo(0, tempYOffset);
+                tempYOffset += 4;
+    
+                if (tempScrollCount > 16) {
+                    clearInterval(siId);
+                }
+                tempScrollCount++;
+            }, 20); // 100 = 0.1s
+        }
+
 
         // ('resize', scrollLoop) 왜 이렇게 안하냐면 다른 이벤트들도 있어서
         // 로드 전 스크롤 하면 에러가 생겨서 로드가 끝난 뒤 스크롤이벤트를 실행하면 에러가 안 생긴다
@@ -629,14 +654,19 @@
 
         window.addEventListener('resize', () => {
             if (window.innerWidth > 900) {
-                setLayout();
-                sceneInfo[3].values.rectStartY = 0;
+                // setLayout();
+                // sceneInfo[3].values.rectStartY = 0;
+                // resize할 때 섹션2번 가로 양옆에 있는 흰색박스 위치가 이상해지는 오류가 생긴다 그래서 reload
+                window.location.reload();
             }
         });
     
         // 모바일 기기를 방향전환할 때 일어나는 이벤트
         window.addEventListener('orientationchange' , () => {
-            setTimeout(setLayout, 300);
+            scrollTo(0,0);
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
         });
         document.body.querySelector('.loading').addEventListener('transitionend', (e) => {
             document.body.removeChild(e.currentTarget);
